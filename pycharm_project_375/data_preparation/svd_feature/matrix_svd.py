@@ -1,0 +1,41 @@
+# encoding=utf-8
+
+import numpy as np
+from scipy.sparse.linalg import svds
+from scipy import sparse as sp
+
+pca_dim = 16
+pca_maxiter = 200
+
+
+def vector_to_diagonal(vector):
+    """
+    将向量放在对角矩阵的对角线上
+    :param vector:
+    :return:
+    """
+    if (isinstance(vector, np.ndarray) and vector.ndim == 1) or \
+            isinstance(vector, list):
+        length = len(vector)
+        diag_matrix = np.zeros((length, length))
+        np.fill_diagonal(diag_matrix, vector)
+        return diag_matrix
+    return None
+
+
+interMatrix = np.load('../../data/matrix.npy')
+
+interMatrix = interMatrix.astype('float')
+U, S, VT = svds(sp.csr_matrix(interMatrix), k=pca_dim, maxiter=pca_maxiter)
+S = vector_to_diagonal(S)
+
+print('RNA vector representation shape:')
+print(U.shape)
+print('Singular value matrix：')
+print(np.sum(S, axis=0))
+print('disease vector representation shape:')
+print(VT.T.shape)
+
+np.save('../../data/r16_feature.npy', U)
+np.save('../../data/d16_feature.npy', VT.T)
+
